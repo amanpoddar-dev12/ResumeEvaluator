@@ -2,8 +2,10 @@ import streamlit as st
 import PyPDF2
 import google.generativeai as genai
 import json  # To handle structured responses
+import os
+from dotenv import load_dotenv
 
-
+load_dotenv()
 # Function to extract text from a PDF resume
 def extract_text_from_pdf(uploaded_file):
     try:
@@ -17,7 +19,7 @@ def extract_text_from_pdf(uploaded_file):
 
 # Function to initialize the Gemini model
 def model_llm():
-    genai.configure(api_key="AIzaSyAlJWy3c0-ryq8hOVb37pnYLAybmyTkdMQ")  # Replace with your actual Gemini API key
+    genai.configure(api_key=os.getenv("API_KEY"))  # Replace with your actual Gemini API key
     return genai.GenerativeModel("gemini-pro")
 
 
