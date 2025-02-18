@@ -44,7 +44,10 @@ def analyze_resume(resume_text, job_role):
             "Education": "B.Tech in Computer Science",
             "Experience": "2 years at XYZ Company",
             "Certifications": ["AWS Certified"],
-            "Projects": ["Chatbot using NLP"]
+            "Projects": ["Chatbot using NLP"],
+            "Languages": ["English", "Spanish"],
+            "Achievements": ["Best Employee Award 2022"],
+            "Interests": ["AI Research", "Open Source Contributions"]
         }},
         "Improvement_Suggestions": [
             "Add more technical skills relevant to {job_role}.",
@@ -56,12 +59,40 @@ def analyze_resume(resume_text, job_role):
             "Data Structures & Algorithms in Python (Udemy)"
         ]
     }}
+
+    **Important Notes:**
+    - If you cannot extract certain details, use "N/A" or an empty list/string as appropriate.
+    - Ensure the output is always in valid JSON format.
+    - If the resume text is insufficient or unclear, return a JSON with default values and suggestions for improvement.
     """
 
     model = model_llm()
     response = model.generate_content(prompt)
 
-    return response.text.strip()
+    try:
+        # Attempt to parse the response as JSON
+        return json.loads(response.text.strip())
+    except json.JSONDecodeError:
+        # If parsing fails, return a default JSON structure
+        return {
+            "ATS_Score": 0,
+            "Key_Details": {
+                "Name": "N/A",
+                "Contact": "N/A",
+                "Skills": [],
+                "Education": "N/A",
+                "Experience": "N/A",
+                "Certifications": [],
+                "Projects": [],
+                "Languages": [],
+                "Achievements": [],
+                "Interests": []
+            },
+            "Improvement_Suggestions": [
+                "The resume text was insufficient or unclear. Please ensure the resume is complete and well-formatted."
+            ],
+            "Recommended_Courses": []
+        }
 
 
 # Streamlit UI
@@ -89,22 +120,15 @@ def main():
                 job_role_input = job_role if job_role else "General Job Role"
                 ats_result = analyze_resume(resume_text, job_role_input)
 
-            try:
-                ats_data = json.loads(ats_result)  # Convert string to JSON
-            except json.JSONDecodeError:
-                st.error("⚠️ Error in AI response formatting.")
-                st.write(ats_result)  # Show raw output if JSON parsing fails
-                return
-
             # Display ATS Score
             st.markdown(
-                f"<h2 style='text-align: center; color: #FF5733;'>🎯 ATS Score: {ats_data['ATS_Score']}/100</h2>",
+                f"<h2 style='text-align: center; color: #FF5733;'>🎯 ATS Score: {ats_result['ATS_Score']}/100</h2>",
                 unsafe_allow_html=True,
             )
 
             # Display Key Details in a structured format
             st.subheader("📌 Extracted Resume Details")
-            details = ats_data["Key_Details"]
+            details = ats_result["Key_Details"]
             st.markdown(f"""
             - **👤 Name:** {details.get("Name", "N/A")}
             - **📧 Contact:** {details.get("Contact", "N/A")}
@@ -113,16 +137,19 @@ def main():
             - **💼 Experience:** {details.get("Experience", "N/A")}
             - **📜 Certifications:** {", ".join(details.get("Certifications", []))}
             - **📂 Projects:** {", ".join(details.get("Projects", []))}
+            - **🗣 Languages:** {", ".join(details.get("Languages", []))}
+            - **🏆 Achievements:** {", ".join(details.get("Achievements", []))}
+            - **🎨 Interests:** {", ".join(details.get("Interests", []))}
             """, unsafe_allow_html=True)
 
             # Improvement Suggestions
             st.subheader("🚀 Suggestions for Improvement")
-            for suggestion in ats_data["Improvement_Suggestions"]:
+            for suggestion in ats_result["Improvement_Suggestions"]:
                 st.markdown(f"- ✅ {suggestion}")
 
             # Recommended Courses
             st.subheader("📚 Recommended Courses & Certifications")
-            for course in ats_data["Recommended_Courses"]:
+            for course in ats_result["Recommended_Courses"]:
                 st.markdown(f"- 📖 {course}")
 
     elif uploaded_file and not analyze_button:
