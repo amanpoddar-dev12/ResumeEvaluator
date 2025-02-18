@@ -6,6 +6,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
+
 # Function to extract text from a PDF resume
 def extract_text_from_pdf(uploaded_file):
     try:
@@ -68,20 +69,25 @@ def main():
     st.set_page_config(page_title="Resume ATS Evaluator", layout="wide")
 
     st.markdown("<h1 style='text-align: center; color: #4CAF50;'>📄 Resume ATS Evaluator</h1>", unsafe_allow_html=True)
-    st.write("Upload your resume, select the job role you are applying for, and get tailored ATS insights.")
+    st.write("Upload your resume, and get tailored ATS insights. You can optionally enter the job role you are applying for.")
 
     uploaded_file = st.file_uploader("📂 Upload Resume (PDF)", type="pdf")
 
-    job_role = st.text_input("🎯 Enter the job role you are applying for (e.g., Software Engineer, Data Analyst)")
+    job_role = st.text_input("🎯 Enter the job role you are applying for (e.g., Software Engineer, Data Analyst) (Optional)")
 
-    if uploaded_file and job_role:
+    # Add a button to trigger the analysis
+    analyze_button = st.button("🔍 Analyze Resume")
+
+    if uploaded_file and analyze_button:
         st.success("✅ Resume uploaded successfully!")
         resume_text = extract_text_from_pdf(uploaded_file)
 
         if resume_text:
             st.subheader("📊 Resume Analysis")
             with st.spinner("🔍 Analyzing resume... Please wait."):
-                ats_result = analyze_resume(resume_text, job_role)
+                # If job role is provided, use it, otherwise use a default message
+                job_role_input = job_role if job_role else "General Job Role"
+                ats_result = analyze_resume(resume_text, job_role_input)
 
             try:
                 ats_data = json.loads(ats_result)  # Convert string to JSON
@@ -119,10 +125,10 @@ def main():
             for course in ats_data["Recommended_Courses"]:
                 st.markdown(f"- 📖 {course}")
 
-    elif uploaded_file and not job_role:
-        st.warning("⚠️ Please enter the job role before analyzing your resume.")
+    elif uploaded_file and not analyze_button:
+        st.warning("⚠️ Please click the 'Analyze Resume' button to get the ATS evaluation.")
 
-    elif not uploaded_file and job_role:
+    elif not uploaded_file and analyze_button:
         st.warning("⚠️ Please upload your resume before analysis.")
 
 
