@@ -59,6 +59,7 @@ def analyze_resume(resume_text, job_role):
     }}
 
     **Important Notes:**
+    - Ats score should be accurate and it should be according to mention key deatails,if any key details is missing it  should affect ats score and it show  improvement suggestion.
     - If you cannot extract certain details, use "N/A" or an empty list/string as appropriate.
     - Ensure the output is always in valid JSON format.
     - If the resume text is insufficient or unclear, return a JSON with default values and suggestions for improvement.  Make sure "Projects", "Skills", etc. are *always* lists of strings.
